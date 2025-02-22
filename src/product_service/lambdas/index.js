@@ -14,6 +14,6 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-__exportStar(require("./get-product_service"), exports);
-__exportStar(require("./product_service_by_id"), exports);
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJpbmRleC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7O0FBQUEsd0RBQXNDO0FBQ3RDLDBEQUF3QyIsInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCAqIGZyb20gJy4vZ2V0LXByb2R1Y3Rfc2VydmljZSc7XHJcbmV4cG9ydCAqIGZyb20gJy4vcHJvZHVjdF9zZXJ2aWNlX2J5X2lkJztcclxuIl19
+__exportStar(require("./products-available.service"), exports);
+__exportStar(require("./products-by-id.service"), exports);
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJpbmRleC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7O0FBQUEsK0RBQTZDO0FBQzdDLDJEQUF5QyIsInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCAqIGZyb20gJy4vcHJvZHVjdHMtYXZhaWxhYmxlLnNlcnZpY2UnO1xyXG5leHBvcnQgKiBmcm9tICcuL3Byb2R1Y3RzLWJ5LWlkLnNlcnZpY2UnO1xyXG4iXX0=
