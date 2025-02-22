@@ -2,13 +2,11 @@
   "name": "nodejs-aws-shop-backend",
   "version": "1.0.0",
   "description": "nodejs-aws-shop-backend",
-  "bin": {
-    "nodejs-aws-shop-backend": "src/bin/app.js"
-  },
+  "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node src/bin/app.js",
-    "dev": "ts-node src/bin/app.ts",
+    "start": "node index.js",
+    "dev": "ts-node index.ts",
     "deploy": "npm run build && cdk deploy",
     "cdk": "cdk",
     "test": "jest"

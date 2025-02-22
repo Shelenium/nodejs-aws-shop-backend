@@ -1,1 +1,1 @@
-export * from './bin';
+export * from './lambdas';

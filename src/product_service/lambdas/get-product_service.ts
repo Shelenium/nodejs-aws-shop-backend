@@ -9,8 +9,8 @@ export class GetProductServiceStack extends Stack {
 
         const getProductsList = new lambda.Function(this, 'GetProductsList', {
             runtime: lambda.Runtime.NODEJS_20_X,
-            handler: 'get-products-list.handler',
-            code: lambda.Code.fromAsset('./src/product_service/lambdas'),
+            handler: 'get-product-list.handler',
+            code: lambda.Code.fromAsset('./src/product_service/handlers'),
         });
 
         // Define the API Gateway and the /products GET endpoint
