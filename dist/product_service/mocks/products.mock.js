@@ -1,0 +1,9 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.productsMock = void 0;
+exports.productsMock = [
+    { id: "1", title: "Product 1", description: "Description 1", price: 100 },
+    { id: "2", title: "Product 2", description: "Description 2", price: 200 },
+    { id: "3", title: "Product 3", description: "Description 3", price: 300 }
+];
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHJvZHVjdHMubW9jay5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9wcm9kdWN0X3NlcnZpY2UvbW9ja3MvcHJvZHVjdHMubW9jay50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7QUFFYSxRQUFBLFlBQVksR0FBYztJQUNuQyxFQUFFLEVBQUUsRUFBRSxHQUFHLEVBQUUsS0FBSyxFQUFFLFdBQVcsRUFBRSxXQUFXLEVBQUUsZUFBZSxFQUFFLEtBQUssRUFBRSxHQUFHLEVBQUU7SUFDekUsRUFBRSxFQUFFLEVBQUUsR0FBRyxFQUFFLEtBQUssRUFBRSxXQUFXLEVBQUUsV0FBVyxFQUFFLGVBQWUsRUFBRSxLQUFLLEVBQUUsR0FBRyxFQUFFO0lBQ3pFLEVBQUUsRUFBRSxFQUFFLEdBQUcsRUFBRSxLQUFLLEVBQUUsV0FBVyxFQUFFLFdBQVcsRUFBRSxlQUFlLEVBQUUsS0FBSyxFQUFFLEdBQUcsRUFBRTtDQUM1RSxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgUHJvZHVjdCB9IGZyb20gJy4uL21vZGVscyc7XHJcblxyXG5leHBvcnQgY29uc3QgcHJvZHVjdHNNb2NrOiBQcm9kdWN0W10gPSBbXHJcbiAgICB7IGlkOiBcIjFcIiwgdGl0bGU6IFwiUHJvZHVjdCAxXCIsIGRlc2NyaXB0aW9uOiBcIkRlc2NyaXB0aW9uIDFcIiwgcHJpY2U6IDEwMCB9LFxyXG4gICAgeyBpZDogXCIyXCIsIHRpdGxlOiBcIlByb2R1Y3QgMlwiLCBkZXNjcmlwdGlvbjogXCJEZXNjcmlwdGlvbiAyXCIsIHByaWNlOiAyMDAgfSxcclxuICAgIHsgaWQ6IFwiM1wiLCB0aXRsZTogXCJQcm9kdWN0IDNcIiwgZGVzY3JpcHRpb246IFwiRGVzY3JpcHRpb24gM1wiLCBwcmljZTogMzAwIH1cclxuXTtcclxuIl19
