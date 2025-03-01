@@ -3,24 +3,37 @@ import { Product, Stock } from '../models';
 import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { UiProductModel } from '../models/ui-product.model';
+import { databaseConnectionError, missingDataError } from './data-errors.handler';
+
+const headers = { 
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Methods": "GET",
+  "Access-Control-Allow-Origin": "*",
+};
 
 const dynamoDb = DynamoDBDocumentClient.from(
   new DynamoDBClient({ region: process.env.AWS_REGION })
 );
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const headers = { 
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Methods": "GET",
-    "Access-Control-Allow-Origin": "*",
-  };
-
   try {
     const productsResult = await dynamoDb.send(new ScanCommand({ TableName: process.env.PRODUCT_TABLE! }));
+      if (!productsResult) {
+        return databaseConnectionError;
+      };
     const products = productsResult.Items as Product[];
+    if (!products) {
+      return missingDataError;
+    };
 
     const stockResult = await dynamoDb.send(new ScanCommand({ TableName: process.env.STOCK_TABLE! }));
+    if (!stockResult) {
+      return databaseConnectionError;
+    };
     const stocks = stockResult.Items as Stock[];
+    if (!stocks) {
+      return missingDataError;
+    };
 
     const uiProducts: UiProductModel[] = products.map(product => ({
       ...product,

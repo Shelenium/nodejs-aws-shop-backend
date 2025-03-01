@@ -3,7 +3,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Product } from '../product_service/models';
 import { generateCustomString } from './generate-custom-string';
-import { generateMockData } from './generate-mock-data';
 
 export const product_table_size = 25;
 

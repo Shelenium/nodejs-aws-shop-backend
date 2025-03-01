@@ -37,6 +37,19 @@ export class ProductsServiceStack extends Stack {
     productTable.grantReadData(productById);
     stockTable.grantReadData(productById);
 
+    const createProduct: lambda.Function = new lambda.Function(this, 'createProduct', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'create-product.handler',
+      code: lambda.Code.fromAsset('./dist/product_service/handlers'),
+      environment: {
+        PRODUCT_TABLE: productTable.tableName,
+        STOCK_TABLE: stockTable.tableName,
+      },
+    });
+
+    productTable.grantWriteData(createProduct);
+    stockTable.grantWriteData(createProduct);
+
     const api = new apigateway.RestApi(this, 'ProductsServiceApi', {
       restApiName: 'Products Service API',
         defaultCorsPreflightOptions,
@@ -46,9 +59,9 @@ export class ProductsServiceStack extends Stack {
     const productIdResource = productsResource.addResource('{productId}');
 
     productsResource.addMethod('GET', new apigateway.LambdaIntegration(productsList), getCorsMethodOptions());
+    productsResource.addMethod('POST', new apigateway.LambdaIntegration(createProduct), getCorsMethodOptions());
 
     productIdResource.addMethod('PUT', new apigateway.LambdaIntegration(productById), getCorsMethodOptions());
-    productIdResource.addMethod('POST', new apigateway.LambdaIntegration(productById), getCorsMethodOptions());
     productIdResource.addMethod('DELETE', new apigateway.LambdaIntegration(productById), getCorsMethodOptions());
     productIdResource.addMethod('GET', new apigateway.LambdaIntegration(productById), getCorsMethodOptions());
   }
