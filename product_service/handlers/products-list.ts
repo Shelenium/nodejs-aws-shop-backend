@@ -1,8 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { Product, Stock } from '../models';
+import { Product, Stock, UiProductModel } from '../models';
 import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { UiProductModel } from '../models/ui-product.model';
 import { databaseConnectionError, missingDataError } from './data-errors.handler';
 
 const headers = { 

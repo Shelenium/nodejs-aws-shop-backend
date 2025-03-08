@@ -1,8 +1,7 @@
 import { APIGatewayProxyResult } from 'aws-lambda';
 import { DynamoDBDocumentClient, TransactWriteCommand, TransactWriteCommandInput, TransactWriteCommandOutput } from '@aws-sdk/lib-dynamodb';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { UiProductModel } from '../models/ui-product.model';
-import { marshall } from "@aws-sdk/util-dynamodb";
+import { UiProductModel } from '../models';
 import { generateUUID } from './uuid.helper';
 
 const headers = { 

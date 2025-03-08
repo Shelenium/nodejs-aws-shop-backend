@@ -21,14 +21,15 @@
     "inlineSources": true,
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
+    "moduleResolution": "node",
     "typeRoots": [
       "./node_modules/@types"
     ]
   },
-  "include": ["**/*"],
+  "include": ["handlers/**/*.ts"],
   "exclude": [
     "node_modules",
     "cdk.out",
     "dist"
-  ]
+  ],
 }
