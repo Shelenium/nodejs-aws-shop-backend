@@ -15,7 +15,7 @@ export class ImportStack extends Stack {
       autoDeleteObjects: false, // Prevent accidental object deletions during "destroy"
     });
 
-    const assetsPath: string = path.resolve(__dirname, './assets');
+    const assetsPath: string = path.resolve(__dirname, '../../assets');
     console.log(assetsPath);
 
     // Create an "empty folder" placeholder
@@ -78,12 +78,12 @@ export class ImportStack extends Stack {
       }
     );
 
-    new CfnOutput(this, 'ImportServiceApi', {
+    new CfnOutput(this, 'ImportServiceApiOutput', {
       value: api.url,
       description: 'The base URL of the Import Service API',
     });
 
-    new CfnOutput(this, 'artRSSShopFilesBucketName', {
+    new CfnOutput(this, 'artRSSShopFilesBucketNameOutput', {
       value: artRSSShopFilesBucket.bucketName,
       description: 'The name of the S3 bucket for imported files',
     });

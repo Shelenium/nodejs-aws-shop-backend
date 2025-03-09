@@ -6,7 +6,9 @@ import { App } from 'aws-cdk-lib';
 
 const app = new App();
 
-const layerStack = new LayerStack(app, 'LayerStack');
+const layerStack = new LayerStack(app, 'LayerStack', {
+  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.AWS_REGION },
+});
 
 new ProductsStack(app, 'ProductsServiceStack', layerStack, {
   env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.AWS_REGION },

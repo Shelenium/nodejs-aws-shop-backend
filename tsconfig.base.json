@@ -11,6 +11,7 @@
       "*": ["node_modules/*"],
     },
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "declaration": true,
     "strict": true,
     "noImplicitAny": true,
