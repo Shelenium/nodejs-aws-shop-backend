@@ -1,7 +1,7 @@
 // generateMockData.ts
 
 import { v4 as uuidv4 } from 'uuid';
-import { Product } from '../product_service/models';
+import { Product } from '../product_service/src/models';
 import { generateCustomString } from './generate-custom-string';
 
 export const product_table_size = 25;
