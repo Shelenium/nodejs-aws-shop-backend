@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "*": ["node_modules/*"],
+    },
+    "rootDirs": ["import-service", "product-service", "cdk"],
+    "noEmit": false,
+  },
+  "include": ["import-service/src/**/*", "product-service/src/**/*", "cdk/src/**/*"],
+  "exclude": [
+    "node_modules",
+    "cdk.out",
+    "dist"
+  ]
+}

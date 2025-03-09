@@ -4,6 +4,7 @@ import * as csv from 'csv-parser';
 import { Readable } from 'stream';
 
 const s3Client = new S3Client({ region: process.env.AWS_REGION });
+const csvParser = (csv as any).default || csv;
 
 export const fileParserHandler: S3Handler = async (event: S3Event): Promise<void> => {
   console.log('Received S3 event:', JSON.stringify(event, null, 2));
@@ -25,7 +26,7 @@ export const fileParserHandler: S3Handler = async (event: S3Event): Promise<void
 
       await new Promise((resolve, reject) => {
         readableStream
-          .pipe(csv())
+          .pipe(csvParser())
           .on("data", (data: string) => {
             console.log("Parsed record:", data);
           })

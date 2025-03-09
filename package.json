@@ -4,7 +4,7 @@
   "description": "nodejs-aws-shop-backend",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && cp -R layer dist/",
+    "build": "tsc --build && cp -R layer dist/ && cp assets dist/",
     "start": "node index.js",
     "dev": "ts-node index.ts",
     "deploy": "npm run build && cdk deploy",

@@ -3,7 +3,7 @@ const path = require("path");
 
 try {
   const props = {
-    sourcePath: "./dist/cdk/configs/empty.txt",
+    sourcePath: "./dist/assets",
     exclude: [],
     extraHash: "custom-hash",
   };

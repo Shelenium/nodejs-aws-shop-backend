@@ -1,10 +1,8 @@
 #!/usr/bin/env node
 import 'dotenv/config';
 import 'source-map-support/register';
-import { ProductsStack } from './products.stack';
-import { ImportStack } from './import.stack';
+import { ProductsStack, ImportStack, LayerStack } from './src';
 import { App } from 'aws-cdk-lib';
-import { LayerStack } from './layer.stack';
 
 const app = new App();
 
