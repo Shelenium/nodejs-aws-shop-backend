@@ -13,7 +13,7 @@ export class ProductsStack extends Stack {
 
     const productsList: aws_lambda.Function = new aws_lambda.Function(this, 'ProductsList', {
       runtime: aws_lambda.Runtime.NODEJS_20_X,
-      handler: 'products-list.handler',
+      handler: 'products-list.productsListHandler',
       code: aws_lambda.Code.fromAsset('./dist/product_service/handlers'),
       environment: {
         PRODUCT_TABLE: productTable.tableName,
@@ -26,7 +26,7 @@ export class ProductsStack extends Stack {
 
     const productById: aws_lambda.Function = new aws_lambda.Function(this, 'ProductById', {
       runtime: aws_lambda.Runtime.NODEJS_20_X,
-      handler: 'product-by-id.handler',
+      handler: 'product-by-id.productByIdHandler',
       code: aws_lambda.Code.fromAsset('./dist/product_service/handlers'),
       environment: {
         PRODUCT_TABLE: productTable.tableName,
@@ -40,7 +40,7 @@ export class ProductsStack extends Stack {
 
     const createProduct: aws_lambda.Function = new aws_lambda.Function(this, 'createProduct', {
       runtime: aws_lambda.Runtime.NODEJS_20_X,
-      handler: 'create-product.handler',
+      handler: 'create-product.createProductHandler',
       code: aws_lambda.Code.fromAsset('./dist/product_service/handlers'),
       environment: {
         PRODUCT_TABLE: productTable.tableName,

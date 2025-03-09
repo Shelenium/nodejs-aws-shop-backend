@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "extends": "../tsconfig.json",
     "target": "ES2020",
     "module": "commonjs",
     "lib": [
@@ -7,6 +8,7 @@
       "dom"
     ],
     "outDir": "./dist",
+    "rootDir": "./src",
     "declaration": true,
     "strict": true,
     "noImplicitAny": true,
@@ -25,10 +27,9 @@
       "./node_modules/@types"
     ]
   },
-  "include": ["**/*.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": [
     "node_modules",
-    "cdk.out",
     "dist"
   ]
 }

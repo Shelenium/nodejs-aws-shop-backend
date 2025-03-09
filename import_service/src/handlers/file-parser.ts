@@ -5,7 +5,7 @@ import { Readable } from 'stream';
 
 const s3Client = new S3Client({ region: process.env.AWS_REGION });
 
-export const handler: S3Handler = async (event: S3Event): Promise<void> => {
+export const fileParserHandler: S3Handler = async (event: S3Event): Promise<void> => {
   console.log('Received S3 event:', JSON.stringify(event, null, 2));
 
   for (const record of event.Records) {

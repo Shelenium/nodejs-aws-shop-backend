@@ -3,7 +3,7 @@
 import { generateMockProduct, product_table_size } from './generate-product-mock-data';
 import * as fs from 'fs';
 import { generateMockData } from './generate-mock-data';
-import { Product } from '../product_service/models';
+import { Product } from '../product_service/src/models';
 
 export const generateProductsMockData: Product[] = generateMockData(generateMockProduct, product_table_size);
 const dataString = `export const productsDataMock = ${JSON.stringify(generateProductsMockData, null, 2)};`;

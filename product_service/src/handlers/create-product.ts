@@ -14,7 +14,7 @@ const dynamoDb = DynamoDBDocumentClient.from(
   new DynamoDBClient({ region: process.env.AWS_REGION })
 );
 
-export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
+export const createProductHandler = async (event: any): Promise<APIGatewayProxyResult> => {
   const uiProduct: UiProductModel | undefined | null = JSON.parse(event.body);
   if (!uiProduct) {
     return {

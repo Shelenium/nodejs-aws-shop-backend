@@ -7,6 +7,11 @@
       "dom"
     ],
     "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "*": ["node_modules/*"],
+    },
+    "esModuleInterop": true,
     "declaration": true,
     "strict": true,
     "noImplicitAny": true,
@@ -21,11 +26,14 @@
     "inlineSources": true,
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
+    "moduleResolution": "node",
+    "types": ["node"],
     "typeRoots": [
       "./node_modules/@types"
-    ]
+    ],
+    "rootDirs": ["import-service", "product-service", "cdk"],
   },
-  "include": ["**/*"],
+  "include": ["import-service/src/**/*", "product-service/src/**/*", "cdk/**/*"],
   "exclude": [
     "node_modules",
     "cdk.out",
