@@ -54,7 +54,7 @@ export class ProductsStack extends Stack {
 
     const api = new aws_apigateway.RestApi(this, 'ProductsServiceApi', {
       restApiName: 'Products Service API',
-        defaultCorsPreflightOptions,
+      defaultCorsPreflightOptions,
     });
 
     const productsResource = api.root.addResource('products');

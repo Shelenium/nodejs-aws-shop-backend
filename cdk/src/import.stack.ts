@@ -3,6 +3,7 @@ import { aws_s3, aws_s3_deployment, aws_apigateway, aws_lambda,
   Stack, RemovalPolicy, StackProps, Duration, aws_s3_notifications, CfnOutput } from 'aws-cdk-lib';
 import { LayerStack } from './layer.stack';
 import * as path from 'path';
+import { defaultCorsPreflightOptions, getCorsMethodOptions } from './configs';
 
 export class ImportStack extends Stack {
   constructor(scope: Construct, id: string, layerStack: LayerStack, props?: StackProps) {
@@ -61,10 +62,7 @@ export class ImportStack extends Stack {
     const api = new aws_apigateway.RestApi(this, 'ImportServiceApi', {
       restApiName: 'Import Service API',
       description: 'API for importing product CSV files',
-      defaultCorsPreflightOptions: {
-        allowOrigins: ['*'],
-        allowMethods: ['GET'],
-      },
+      defaultCorsPreflightOptions,
     });
 
     const importResource = api.root.addResource('import');
@@ -72,6 +70,7 @@ export class ImportStack extends Stack {
       'GET',
       new aws_apigateway.LambdaIntegration(importProductsFileLambda),
       {
+        ...getCorsMethodOptions(),
         requestParameters: {
           'method.request.querystring.name': true,
         },

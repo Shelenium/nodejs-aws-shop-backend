@@ -5,6 +5,13 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const s3Client = new S3Client({ region: process.env.AWS_REGION });
 
+const headers = { 
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': '*',
+  'Access-Control-Allow-Methods': 'GET,PUT,POST, DELETE, OPTIONS',
+  'Access-Control-Allow-Credentials': true,
+};
+
 export const importFilesHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   console.log('Event:', JSON.stringify(event));
 
@@ -30,11 +37,12 @@ export const importFilesHandler = async (event: APIGatewayProxyEvent): Promise<A
     return signedUrl;
   };
 
-  return generateSignedPutUrl(bucketName, `uploaded/${fileName}`)
+  const importResult = generateSignedPutUrl(bucketName, `uploaded/${fileName}`)
     .then(signedUrl => {
       console.error('Upload succeed:', JSON.stringify(signedUrl));
       return {
         statusCode: 200,
+        headers,
         body: signedUrl,
       };
     })
@@ -42,10 +50,13 @@ export const importFilesHandler = async (event: APIGatewayProxyEvent): Promise<A
       console.error('Error generating signed URL:', error);
       return {
         statusCode: 500,
+        headers,
         body: JSON.stringify({
           message: 'Could not generate signed URL',
           error,
         }),
       };
     });
+
+    return importResult;
 };
