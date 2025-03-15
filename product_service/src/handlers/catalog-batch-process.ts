@@ -126,7 +126,6 @@ export const catalogBatchProcessHandler: SQSHandler = async (event: SQSEvent) =>
   const processSuccessNotifications = async () => {
     for (const product of succeedProducts) {
       const notification: PublishCommandInput = getSuccessNotification(product);
-      console.log('Notification:', notification);
       await handleNotification(notification);
     }
   };
@@ -134,7 +133,6 @@ export const catalogBatchProcessHandler: SQSHandler = async (event: SQSEvent) =>
   const processFailedNotifications = async () => {
     for (const product of failedProducts) {
       const notification: PublishCommandInput = getFailedNotification(product);
-      console.log('Notification:', notification);
       await handleNotification(notification);
     }
   };
