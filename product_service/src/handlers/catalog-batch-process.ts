@@ -35,34 +35,41 @@ export const catalogBatchProcessHandler: SQSHandler = async (event: SQSEvent) =>
     }
   }
 
-  createdProducts.forEach((product: Product) => {
+  const sendProduct = async (product: Product) => {
     const { id, title, price, description } = product;
     console.log("Sending Product to DynamoDB:", product);
 
-    const sendProduct = async () => {
-      const productItem: PutItemCommandInput = {
-        TableName: tableName,
-        Item: {
-          id: { S: id },
-          title: { S: title },
-          price: { N: price.toString() }, // DynamoDB uses strings for numbers
-          description: { S: description },
-        },
-      };
-
-      const putItemCommand = new PutItemCommand(productItem);
-      await dynamoDbClient.send(putItemCommand);
+    const productItem: PutItemCommandInput = {
+      TableName: tableName,
+      Item: {
+        id: { S: id },
+        title: { S: title },
+        price: { N: price.toString() }, // DynamoDB uses strings for numbers
+        description: { S: description },
+      },
     };
+    console.log("Product Item:", JSON.stringify(productItem, null, 2));
+    const putItemCommand = new PutItemCommand(productItem);
+    await dynamoDbClient.send(putItemCommand);
+  };
 
+  const handleSendProduct = async (product: Product) => {
     try {
-      sendProduct();
+      console.log("Sending product:", product);
+      await sendProduct(product);
       succeedProducts.push(product);
-      console.log(`Product ${id}: ${title} added to DynamoDB ${tableName}`);
+      console.log(`Product ${product.id}: ${product.title} added to DynamoDB ${tableName}`);
     } catch (error) {
       failedProducts.push(product);
-      console.error("Error adding product to DynamoDB:", error, "Record ID:", id);
+      console.error("Error adding product to DynamoDB:", error, "Record ID:", product.id);
     }
-  });
+  }
+
+  const processCreatedProducts = async () => {
+    for (const product of createdProducts) {
+      await handleSendProduct(product);
+    }
+  };
 
   const getSuccessNotification = (product: Product): PublishCommandInput => {
     const messageAttributes = {
@@ -107,22 +114,32 @@ export const catalogBatchProcessHandler: SQSHandler = async (event: SQSEvent) =>
     await snsClient.send(publishCommand);
   }
 
-  const handleNotification = (notification: PublishCommandInput) => {
+  const handleNotification = async (notification: PublishCommandInput) => {
     try {
-      sendNotification(notification);
-      console.log('Notification sent to SNS topic:', snsTopicArn);
+      const result = await sendNotification(notification);
+      console.log('Notification sent to SNS topic:', snsTopicArn, result);
     } catch (error) {
       console.error('Error sending notification:', error);
     }
   }
 
-  succeedProducts.forEach((product: Product) => {
-    const notification: PublishCommandInput = getSuccessNotification(product);
-    handleNotification(notification);
-  });
+  const processSuccessNotifications = async () => {
+    for (const product of succeedProducts) {
+      const notification: PublishCommandInput = getSuccessNotification(product);
+      console.log('Notification:', notification);
+      await handleNotification(notification);
+    }
+  };
 
-  failedProducts.forEach((product: Product) => {
-    const notification: PublishCommandInput = getFailedNotification(product);
-    handleNotification(notification);
-  });
+  const processFailedNotifications = async () => {
+    for (const product of failedProducts) {
+      const notification: PublishCommandInput = getFailedNotification(product);
+      console.log('Notification:', notification);
+      await handleNotification(notification);
+    }
+  };
+
+  processCreatedProducts();
+  processSuccessNotifications();
+  processFailedNotifications();
 };
