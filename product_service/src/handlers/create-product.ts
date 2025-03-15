@@ -1,8 +1,7 @@
 import { APIGatewayProxyResult } from 'aws-lambda';
 import { DynamoDBDocumentClient, TransactWriteCommand, TransactWriteCommandInput, TransactWriteCommandOutput } from '@aws-sdk/lib-dynamodb';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { UiProductModel } from '../models/ui-product.model';
-import { marshall } from "@aws-sdk/util-dynamodb";
+import { UiProductModel } from '../models';
 import { generateUUID } from './uuid.helper';
 
 const headers = { 
@@ -15,7 +14,7 @@ const dynamoDb = DynamoDBDocumentClient.from(
   new DynamoDBClient({ region: process.env.AWS_REGION })
 );
 
-export const handler = async (event: any): Promise<APIGatewayProxyResult> => {
+export const createProductHandler = async (event: any): Promise<APIGatewayProxyResult> => {
   const uiProduct: UiProductModel | undefined | null = JSON.parse(event.body);
   if (!uiProduct) {
     return {

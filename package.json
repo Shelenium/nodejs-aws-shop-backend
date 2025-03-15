@@ -4,21 +4,20 @@
   "description": "nodejs-aws-shop-backend",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --build && cp -R layer dist/ && cp -R assets dist/",
     "start": "node index.js",
     "dev": "ts-node index.ts",
     "deploy": "npm run build && cdk deploy",
     "cdk": "cdk",
     "test": "jest",
-    "esbuild": "npx esbuild src/app.ts --bundle --platform=node --outfile=dist/index.js"
+    "esbuild": "npx esbuild cdk/app.ts --bundle --platform=node --outfile=dist/index.js"
   },
   "keywords": [],
   "author": "Elena Shokhan",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.758.0",
-    "@aws-sdk/lib-dynamodb": "^3.758.0",
-    "aws-cdk-lib": "^2.180.0",
+    "aws-cdk-lib": "^2.182.0",
+    "aws-lambda": "^1.0.7",
     "constructs": "^10.4.2",
     "dotenv": "^16.4.7",
     "source-map-support": "^0.5.21",
@@ -27,7 +26,7 @@
   "devDependencies": {
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/aws-lambda": "^8.10.147",
-    "@types/node": "^22.13.5",
+    "@types/node": "^22.13.10",
     "esbuild": "^0.25.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
