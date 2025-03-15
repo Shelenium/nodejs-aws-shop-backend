@@ -1,3 +1,4 @@
+export * from './catalog-batch-process';
 export * from './create-product';
 export * from './data-errors.handler';
 export * from './product-by-id';

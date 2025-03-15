@@ -1,10 +1,18 @@
 import { S3Handler, S3Event } from 'aws-lambda';
 import { CopyObjectCommand, DeleteObjectCommand, GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import csv from 'csv-parser';
 import { Readable } from 'stream';
 
 const s3Client = new S3Client({ region: process.env.AWS_REGION });
 const csvParser = (csv as any).default || csv;
+const sqsClient = new SQSClient({ region: process.env.AWS_REGION });
+
+const SQS_QUEUE_URL = process.env.SQS_QUEUE_URL;
+
+if (!SQS_QUEUE_URL) {
+  throw new Error("SQS_QUEUE_URL is not configured in environment variables.");
+}
 
 export const fileParserHandler: S3Handler = async (event: S3Event): Promise<void> => {
   console.log('Received S3 event:', JSON.stringify(event, null, 2));
@@ -24,20 +32,35 @@ export const fileParserHandler: S3Handler = async (event: S3Event): Promise<void
       const response = await s3Client.send(getObjectCommand);
       const readableStream = response.Body as Readable;
 
+      const sendRecord = async (record: string) => {
+        console.log("Sending record to SQS:", record);
+
+        const sendMessageCommand = new SendMessageCommand({
+          QueueUrl: SQS_QUEUE_URL,
+          MessageBody: JSON.stringify(record),
+        });
+        await sqsClient.send(sendMessageCommand);
+      };
+
       await new Promise((resolve, reject) => {
         const results: unknown[] = [];
         readableStream
           .pipe(csvParser())
-          .on("data", (data: unknown) => {
-            console.log("Parsed record:", JSON.stringify(data));
+          .on("data", (data: string) => {
             results.push(data);
+            try { 
+              sendRecord(data);
+              console.log(`File ${objectKey} processed successfully.`);
+            } catch (error) {
+              console.error(`Error sending record to SQS: ${error}`);
+            }
           })
           .on("error", (error: unknown) => {
             console.error("Error while parsing CSV:", error);
             reject(error);
           })
           .on("end", () => {
-            console.log("CSV file processing complete.");
+            console.log(`CSV file from ${objectKey} fully parsed and send to SQS.`);
             resolve(results);
           });
       });
