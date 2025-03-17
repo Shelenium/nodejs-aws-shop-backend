@@ -1,73 +1,90 @@
-import { DynamoDBClient, PutItemCommand, PutItemCommandInput } from '@aws-sdk/client-dynamodb';
 import { SQSEvent, SQSHandler } from 'aws-lambda';
-import { Product } from '../models';
+import { Product, UiProductModel } from '../models';
 import { SNSClient, PublishCommand, PublishCommandInput } from '@aws-sdk/client-sns';
+import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
 
-const dynamoDbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
+
 const snsClient = new SNSClient({ region: process.env.AWS_REGION });
+const lambdaClient = new LambdaClient({ region: process.env.AWS_REGION });
 
 export const catalogBatchProcessHandler: SQSHandler = async (event: SQSEvent) => {
   console.log('Received SQS Event:', JSON.stringify(event, null, 2));
 
-  const tableName = process.env.PRODUCT_TABLE;
   const snsTopicArn = process.env.SNS_TOPIC_ARN;
-
-  if (!tableName) {
-    throw new Error("Missing PRODUCT_TABLE environment variable.");
-  }
+  const createProductLambdaName = process.env.CREATE_PRODUCT_NAME;
 
   if (!snsTopicArn) {
     throw new Error("Missing SNS_TOPIC_ARN environment variable.");
   }
 
-  const createdProducts: Product[] = [];
-  const succeedProducts: Product[] = [];
-  const failedProducts: Product[] = [];
+  if (!createProductLambdaName) {
+    throw new Error("Missing CREATE_PRODUCT_NAME environment variable.");
+  }
+
+  const createdProducts: UiProductModel[] = [];
+  const succeedProducts: UiProductModel[] = [];
+  const failedProducts: UiProductModel[] = [];
 
   for (const record of event.Records) {
-    const messageBody: Product = JSON.parse(record.body) as Product;
+    const messageBody: UiProductModel = JSON.parse(record.body) as UiProductModel;
+
     console.log("Processing Message:", messageBody);
-    if (createdProducts.find(product => product.id === messageBody.id)) {
+    if (createdProducts.find(product => product.title === messageBody.title)) {
       failedProducts.push(messageBody);
-      throw new Error(`Duplicated product ID: ${messageBody.id}`);
+      console.log(`Duplicated product: ${messageBody.title}`);
+    } else if (messageBody.count < 0 || isNaN(Number(messageBody.count))) {
+      failedProducts.push(messageBody);
+      console.log(`Invalid product count: ${messageBody.title} ${messageBody.count}`);
+    } else if (!messageBody.title) {
+      failedProducts.push(messageBody);
+      console.log(`Invalid product: ${messageBody.title}`);
+    } else if (messageBody.price < 0 || isNaN(Number(messageBody.price))) {
+      failedProducts.push(messageBody);
+      console.log(`Invalid product price: ${messageBody.title} ${messageBody.price}`);
     } else {
-      createdProducts.push(messageBody);
+      createdProducts.push({
+        ...messageBody,
+        count: Number(messageBody.count),
+        price: Number(messageBody.price),
+      });
     }
   }
 
-  const sendProduct = async (product: Product) => {
-    const { id, title, price, description } = product;
-    console.log("Sending Product to DynamoDB:", product);
+  const sendProductLambda = async (product: UiProductModel) => {
 
-    const productItem: PutItemCommandInput = {
-      TableName: tableName,
-      Item: {
-        id: { S: id },
-        title: { S: title },
-        price: { N: price.toString() }, // DynamoDB uses strings for numbers
-        description: { S: description },
-      },
-    };
-    console.log("Product Item:", JSON.stringify(productItem, null, 2));
-    const putItemCommand = new PutItemCommand(productItem);
-    await dynamoDbClient.send(putItemCommand);
+    const payload = JSON.stringify({
+      body: JSON.stringify(product),
+    });
+
+    const command = new InvokeCommand({
+      FunctionName: createProductLambdaName,
+      Payload: Buffer.from(payload),
+    });
+
+    console.log(`${createProductLambdaName} Lambda Payload: `, payload);
+
+    const response = await lambdaClient.send(command);
+
+    console.log(`${createProductLambdaName} Lambda Response:`, response);
+
+    const responsePayload = JSON.parse(new TextDecoder("utf-8").decode(response.Payload));
+    console.log("Decoded Response Payload:", responsePayload);
+    return responsePayload;
   };
 
-  const handleSendProduct = async (product: Product) => {
+  const handleSendProductLambda = async (product: UiProductModel) => {
     try {
-      console.log("Sending product:", product);
-      await sendProduct(product);
-      succeedProducts.push(product);
-      console.log(`Product ${product.id}: ${product.title} added to DynamoDB ${tableName}`);
+      await sendProductLambda(product);
+      console.log(`Create Item Lambda for ${product.title} invoked successfully`);
     } catch (error) {
+      console.error(`Error invoking PutItem Lambda for ${product.title} :`, error);
       failedProducts.push(product);
-      console.error("Error adding product to DynamoDB:", error, "Record ID:", product.id);
     }
   }
 
   const processCreatedProducts = async () => {
     for (const product of createdProducts) {
-      await handleSendProduct(product);
+      await handleSendProductLambda(product);
     }
   };
 

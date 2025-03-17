@@ -1,7 +1,7 @@
-import { Stack, StackProps, aws_lambda, aws_apigateway, aws_sqs, aws_lambda_event_sources, aws_sns, aws_sns_subscriptions, CfnOutput } from 'aws-cdk-lib';
+import { aws_apigateway, aws_lambda, aws_lambda_event_sources, aws_sns, aws_sns_subscriptions, CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
+import { ITable, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
 import { defaultCorsPreflightOptions, getCorsMethodOptions } from './configs';
-import { ITable, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { LayerStack } from './layer.stack';
 
 export class ProductsStack extends Stack {
@@ -74,12 +74,12 @@ export class ProductsStack extends Stack {
       topicName: createProductTopicName,
     });
 
-    const defaultEmail: string = process.env.DEFAULT_EMAIL || '';
-    const vipEmail: string = process.env.VIP_EMAIL || '';
-    const PRICE_LIMIT: number = 100000;
+    const DEFAULT_EMAIL: string = process.env.DEFAULT_EMAIL || '';
+    const VIP_EMAIL: string = process.env.VIP_EMAIL || '';
+    const PRICE_LIMIT: number = Number(process.env.PRICE_LIMIT ?? 0);
 
     createProductTopic.addSubscription(
-      new aws_sns_subscriptions.EmailSubscription(vipEmail, {
+      new aws_sns_subscriptions.EmailSubscription(VIP_EMAIL, {
         filterPolicy: {
           price: aws_sns.SubscriptionFilter.numericFilter({
             greaterThan: PRICE_LIMIT,
@@ -89,7 +89,7 @@ export class ProductsStack extends Stack {
     );
 
     createProductTopic.addSubscription(
-      new aws_sns_subscriptions.EmailSubscription(defaultEmail, {
+      new aws_sns_subscriptions.EmailSubscription(DEFAULT_EMAIL, {
         filterPolicy: {
           price: aws_sns.SubscriptionFilter.numericFilter({
             lessThanOrEqualTo: PRICE_LIMIT,
@@ -103,14 +103,14 @@ export class ProductsStack extends Stack {
       handler: 'catalog-batch-process.catalogBatchProcessHandler',
       code: aws_lambda.Code.fromAsset('./dist/product_service/handlers'),
       environment: {
-        PRODUCT_TABLE: productTable.tableName,
         SNS_TOPIC_ARN: createProductTopic.topicArn,
+        CREATE_PRODUCT_NAME: createProduct.functionName,
       },
       layers: [layerStack.sharedLayer],
     });
 
-    productTable.grantWriteData(catalogBatchProcess);
     createProductTopic.grantPublish(catalogBatchProcess);
+    createProduct.grantInvoke(catalogBatchProcess);
 
     const sqsEventSource = new aws_lambda_event_sources.SqsEventSource(catalogItemsQueue, {
       reportBatchItemFailures: true,
