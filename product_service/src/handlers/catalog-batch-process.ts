@@ -97,7 +97,7 @@ export const catalogBatchProcessHandler: SQSHandler = async (event: SQSEvent) =>
     };
     
     return ({
-      Subject:`'New Product ${product.id}: ${product.title} Created`,
+      Subject: `New Product ${product.id}: ${product.title} Created`,
       Message: JSON.stringify({
         message: `The following product have been successfully created:`,
         product,
@@ -116,7 +116,7 @@ export const catalogBatchProcessHandler: SQSHandler = async (event: SQSEvent) =>
     };
     
     return ({
-      Subject:`'Product ${product.id}: ${product.title} creation failed`,
+      Subject: `Product ${product.id}: ${product.title} creation failed`,
       Message: JSON.stringify({
         message: `The following product creation failed:`,
         product,
