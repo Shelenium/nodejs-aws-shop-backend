@@ -1,4 +1,4 @@
-import { App, aws_lambda, aws_sqs, Stack, StackProps } from 'aws-cdk-lib';
+import { App, aws_lambda, aws_sqs, Duration, Stack, StackProps } from 'aws-cdk-lib';
 
 export class LayerStack extends Stack {
   readonly sharedLayer: aws_lambda.LayerVersion;
@@ -17,6 +17,8 @@ export class LayerStack extends Stack {
 
     this.catalogItemsQueue = new aws_sqs.Queue(this, sqsQueueName, {
       queueName: sqsQueueName,
+      visibilityTimeout: Duration.seconds(80),
+      receiveMessageWaitTime: Duration.seconds(10),
     });
   }
 }

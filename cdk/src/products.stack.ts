@@ -1,4 +1,4 @@
-import { aws_apigateway, aws_lambda, aws_lambda_event_sources, aws_sns, aws_sns_subscriptions, CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
+import { aws_apigateway, aws_lambda, aws_lambda_event_sources, aws_sns, aws_sns_subscriptions, CfnOutput, Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { ITable, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
 import { defaultCorsPreflightOptions, getCorsMethodOptions } from './configs';
@@ -47,6 +47,7 @@ export class ProductsStack extends Stack {
         STOCK_TABLE: stockTable.tableName,
       },
       layers: [layerStack.sharedLayer],
+      timeout: Duration.seconds(10),
     });
 
     productTable.grantWriteData(createProduct);
@@ -107,6 +108,7 @@ export class ProductsStack extends Stack {
         CREATE_PRODUCT_NAME: createProduct.functionName,
       },
       layers: [layerStack.sharedLayer],
+      timeout: Duration.seconds(30),
     });
 
     createProductTopic.grantPublish(catalogBatchProcess);
@@ -117,6 +119,7 @@ export class ProductsStack extends Stack {
       batchSize: 5,
     });
     catalogBatchProcess.addEventSource(sqsEventSource);
+    catalogItemsQueue.grantConsumeMessages(catalogBatchProcess);
 
     new CfnOutput(this, 'ArtRssShopCreateProductTopicARN', {
       value: createProductTopic.topicArn,
