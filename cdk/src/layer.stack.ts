@@ -17,7 +17,7 @@ export class LayerStack extends Stack {
 
     this.catalogItemsQueue = new aws_sqs.Queue(this, sqsQueueName, {
       queueName: sqsQueueName,
-      visibilityTimeout: Duration.seconds(80),
+      visibilityTimeout: Duration.seconds(40),
       receiveMessageWaitTime: Duration.seconds(10),
     });
   }

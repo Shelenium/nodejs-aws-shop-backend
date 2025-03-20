@@ -21,33 +21,30 @@ export const catalogBatchProcessHandler: SQSHandler = async (event: SQSEvent) =>
     throw new Error("Missing CREATE_PRODUCT_NAME environment variable.");
   }
 
-  const createdProducts: UiProductModel[] = [];
-  const succeedProducts: UiProductModel[] = [];
-  const failedProducts: UiProductModel[] = [];
+  const createdProducts: string[] = [];
+  const failedProducts: string[] = [];
 
-  for (const record of event.Records) {
-    const messageBody: UiProductModel = JSON.parse(record.body) as UiProductModel;
-
-    console.log("Processing Message:", messageBody);
-    if (createdProducts.find(product => product.title === messageBody.title)) {
-      failedProducts.push(messageBody);
-      console.log(`Duplicated product: ${messageBody.title}`);
-    } else if (messageBody.count < 0 || isNaN(Number(messageBody.count))) {
-      failedProducts.push(messageBody);
-      console.log(`Invalid product count: ${messageBody.title} ${messageBody.count}`);
-    } else if (!messageBody.title) {
-      failedProducts.push(messageBody);
-      console.log(`Invalid product: ${messageBody.title}`);
-    } else if (messageBody.price < 0 || isNaN(Number(messageBody.price))) {
-      failedProducts.push(messageBody);
-      console.log(`Invalid product price: ${messageBody.title} ${messageBody.price}`);
-    } else {
-      createdProducts.push({
-        ...messageBody,
-        count: Number(messageBody.count),
-        price: Number(messageBody.price),
-      });
-    }
+  const handleInput = (messageBody: UiProductModel): UiProductModel | null  => {
+    switch(true) {
+      case (createdProducts.includes(messageBody.title) || failedProducts.includes(messageBody.title)):
+        console.log(`Duplicated product: ${messageBody.title}`);
+        return null;
+      case (messageBody.count < 0 || isNaN(Number(messageBody.count))):
+        console.log(`Invalid product count: ${messageBody.title} ${messageBody.count}`);
+        return null;
+      case (!messageBody.title):
+        console.log(`Invalid product: ${messageBody.title}`);
+        return null;
+      case (messageBody.price < 0 || isNaN(Number(messageBody.price))):
+        console.log(`Invalid product price: ${messageBody.title} ${messageBody.price}`);
+        return null;
+      default:
+        return ({
+          ...messageBody,
+          count: Number(messageBody.count),
+          price: Number(messageBody.price),
+        });
+    };
   }
 
   const sendProductLambda = async (product: UiProductModel) => {
@@ -61,12 +58,7 @@ export const catalogBatchProcessHandler: SQSHandler = async (event: SQSEvent) =>
       Payload: Buffer.from(payload),
     });
 
-    console.log(`${createProductLambdaName} Lambda Payload: `, payload);
-
     const response = await lambdaClient.send(command);
-
-    console.log(`${createProductLambdaName} Lambda Response:`, response);
-
     const responsePayload = JSON.parse(new TextDecoder("utf-8").decode(response.Payload));
     console.log("Decoded Response Payload:", responsePayload);
     return responsePayload;
@@ -78,15 +70,9 @@ export const catalogBatchProcessHandler: SQSHandler = async (event: SQSEvent) =>
       console.log(`Create Item Lambda for ${product.title} invoked successfully`);
     } catch (error) {
       console.error(`Error invoking PutItem Lambda for ${product.title} :`, error);
-      failedProducts.push(product);
+      failedProducts.push(product.title);
     }
   }
-
-  const processCreatedProducts = async () => {
-    for (const product of createdProducts) {
-      await handleSendProductLambda(product);
-    }
-  };
 
   const getSuccessNotification = (product: Product): PublishCommandInput => {
     const messageAttributes = {
@@ -107,19 +93,19 @@ export const catalogBatchProcessHandler: SQSHandler = async (event: SQSEvent) =>
     });
   }
 
-  const getFailedNotification = (product: Product): PublishCommandInput => {
+  const getFailedNotification = (title: string): PublishCommandInput => {
     const messageAttributes = {
       failedUpload: {
         DataType: 'String',
-        StringValue: JSON.stringify(product.id),
+        StringValue: title,
       },
     };
     
     return ({
-      Subject: `Product ${product.id}: ${product.title} creation failed`,
+      Subject: `Product ${title} creation failed`,
       Message: JSON.stringify({
         message: `The following product creation failed:`,
-        product,
+        title,
       }),
       TopicArn: snsTopicArn,
       MessageAttributes: messageAttributes,
@@ -133,28 +119,33 @@ export const catalogBatchProcessHandler: SQSHandler = async (event: SQSEvent) =>
 
   const handleNotification = async (notification: PublishCommandInput) => {
     try {
-      const result = await sendNotification(notification);
-      console.log('Notification sent to SNS topic:', snsTopicArn, result);
+      await sendNotification(notification);
+      console.log('Notification sent to SNS topic:', snsTopicArn);
     } catch (error) {
       console.error('Error sending notification:', error);
     }
   }
 
-  const processSuccessNotifications = async () => {
-    for (const product of succeedProducts) {
+  const processFailedNotifications = async () => {
+    for (const title of failedProducts) {
+      const notification: PublishCommandInput = getFailedNotification(title);
+      await handleNotification(notification);
+    }
+  };
+
+  for (const record of event.Records) {
+    console.log('Processing record:', record);
+    const messageBody: UiProductModel = JSON.parse(record.body) as UiProductModel;
+    const product: UiProductModel | null = handleInput(messageBody);
+    if (product) {
+      await handleSendProductLambda(product);
       const notification: PublishCommandInput = getSuccessNotification(product);
       await handleNotification(notification);
+      createdProducts.push(messageBody.title);
+    } else {
+      failedProducts.push(messageBody.title);
     }
-  };
+  }
 
-  const processFailedNotifications = async () => {
-    for (const product of failedProducts) {
-      const notification: PublishCommandInput = getFailedNotification(product);
-      await handleNotification(notification);
-    }
-  };
-
-  processCreatedProducts();
-  processSuccessNotifications();
   processFailedNotifications();
 };
