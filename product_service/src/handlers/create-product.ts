@@ -15,7 +15,19 @@ const dynamoDb = DynamoDBDocumentClient.from(
 );
 
 export const createProductHandler = async (event: any): Promise<APIGatewayProxyResult> => {
-  const uiProduct: UiProductModel | undefined | null = JSON.parse(event.body);
+  let uiProduct: UiProductModel | undefined | null;
+
+  try {
+    uiProduct = typeof(event.body) === 'string' ? JSON.parse(event.body) : event.body;
+  } catch (error) {
+    console.error('Error parsing event body:', error, event);
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ message: 'Invalid JSON in request body' }),
+    };
+  }
+
   if (!uiProduct) {
     return {
       statusCode: 400,
