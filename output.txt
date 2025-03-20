@@ -1,1 +1,0 @@
-{"errorType":"SyntaxError","errorMessage":"\"undefined\" is not valid JSON","trace":["SyntaxError: \"undefined\" is not valid JSON","    at JSON.parse (<anonymous>)","    at Runtime.createProductHandler [as handler] (/var/task/create-product.js:14:28)","    at Runtime.handleOnceNonStreaming (file:///var/runtime/index.mjs:1173:29)"]}
