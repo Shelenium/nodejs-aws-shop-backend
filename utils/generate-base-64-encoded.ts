@@ -1,5 +1,5 @@
-  const AUTH_USERNAME: string = 'Shelenium';
-  const AUTH_PASSWORD: string = 'TEST_PASSWORD';
+  const AUTH_USERNAME: string = 'userName';
+  const AUTH_PASSWORD: string = 'userPassword';
 
   const credentials = `${AUTH_USERNAME}:${AUTH_PASSWORD}`;
 
