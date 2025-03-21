@@ -3,6 +3,7 @@
   "references": [
     { "path": "./cdk" },
     { "path": "./import_service" },
-    { "path": "./product_service" }
+    { "path": "./product_service" },
+    { "path": "./authorization_service" }
   ]
 }

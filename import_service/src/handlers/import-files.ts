@@ -8,7 +8,7 @@ const s3Client = new S3Client({ region: process.env.AWS_REGION });
 const headers = { 
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': '*',
-  'Access-Control-Allow-Methods': 'GET,PUT,POST, DELETE, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, PUT, POST, DELETE, OPTIONS',
   'Access-Control-Allow-Credentials': true,
 };
 

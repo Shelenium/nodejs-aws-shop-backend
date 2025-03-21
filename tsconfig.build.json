@@ -6,10 +6,10 @@
     "paths": {
       "*": ["node_modules/*"],
     },
-    "rootDirs": ["import-service", "product-service", "cdk"],
+    "rootDirs": ["authorization_service", "import_service", "product_service", "cdk"],
     "noEmit": false,
   },
-  "include": ["import-service/src/**/*", "product-service/src/**/*", "cdk/src/**/*"],
+  "include": ["import_service/src/**/*", "product_service/src/**/*", "cdk/src/**/*"],
   "exclude": [
     "node_modules",
     "cdk.out",
