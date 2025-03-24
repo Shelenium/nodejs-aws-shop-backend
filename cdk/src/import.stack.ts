@@ -5,7 +5,7 @@ import { aws_s3, aws_s3_deployment, aws_apigateway, aws_lambda,
   Fn} from 'aws-cdk-lib';
 import { LayerStack } from './layer.stack';
 import * as path from 'path';
-import { defaultCorsPreflightOptions, getCorsMethodOptions } from './configs';
+import { authorizationHeaders, defaultCorsPreflightOptions, getCorsMethodOptions } from './configs';
 
 export class ImportStack extends Stack {
   constructor(scope: Construct, id: string, layerStack: LayerStack, props: StackProps) {
@@ -77,6 +77,32 @@ export class ImportStack extends Stack {
       defaultCorsPreflightOptions: {
         ...defaultCorsPreflightOptions,
         allowHeaders: ['Content-Type', 'Authorization'],
+      },
+    });
+
+    api.addGatewayResponse("UnauthorizedResponse", {
+      type: aws_apigateway.ResponseType.UNAUTHORIZED,
+      statusCode: "401",
+      responseHeaders: authorizationHeaders,
+      templates: {
+        "application/json": JSON.stringify({
+          message: "Unauthorized: Missing or invalid token",
+          errorType: "UNAUTHORIZED",
+          errorCode: 401,
+        }),
+      },
+    });
+    
+    api.addGatewayResponse("ForbiddenResponse", {
+      type: aws_apigateway.ResponseType.ACCESS_DENIED,
+      statusCode: "403",
+      responseHeaders: authorizationHeaders,
+      templates: {
+        "application/json": JSON.stringify({
+          message: "Forbidden: You do not have access to this resource",
+          errorType: "FORBIDDEN",
+          errorCode: 403,
+        }),
       },
     });
 

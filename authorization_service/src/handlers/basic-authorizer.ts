@@ -32,11 +32,14 @@ export const basicAuthorizerHandler = async (event: APIGatewayAuthorizerEvent): 
     const authorizationHeader = (event as APIGatewayTokenAuthorizerEvent).authorizationToken;
     if (!authorizationHeader) {
       console.log('Missing Authorization header: ', event);
-      return {
-        statusCode: 401,
-        headers,
-        body: JSON.stringify({ message: 'Unauthorized' }),
-      };
+      return ({
+        ...generatePolicy('unauthorized-user', 'Deny', event.methodArn),
+          context: {
+            errorType: "UNAUTHORIZED",
+            errorMessage: "Missing token",
+            statusCode: 401,
+          },
+        });
     }
 
     const decodedToken = Buffer.from(authorizationHeader, 'base64').toString('utf-8');
@@ -44,11 +47,14 @@ export const basicAuthorizerHandler = async (event: APIGatewayAuthorizerEvent): 
 
     if (!username || !password) {
       console.log('Invalid token format: ', decodedToken);
-      return {
-        statusCode: 403,
-        headers,
-        body: JSON.stringify({ message: 'Access is denied' }),
-      };
+      return ({
+        ...generatePolicy('unauthorized-user', 'Deny', event.methodArn),
+          context: {
+            errorType: "UNAUTHORIZED",
+            errorMessage: "Invalid token format",
+            statusCode: 401,
+          },
+        });
     }
 
     const validUsername = process.env.AUTH_USERNAME || 'admin';
@@ -56,11 +62,14 @@ export const basicAuthorizerHandler = async (event: APIGatewayAuthorizerEvent): 
 
     if (username !== validUsername || password !== validPassword) {
       console.log('Invalid credentials: ', validUsername, validPassword);
-      return {
-        statusCode: 403,
-        headers,
-        body: JSON.stringify({ message: 'Access is denied' }),
-      };
+      return ({
+        ...generatePolicy('unauthorized-user', 'Deny', event.methodArn),
+          context: {
+            errorType: "FORBIDDEN",
+            errorMessage: "Token is not authorized to access this resource",
+            statusCode: 403,
+          },
+        });
     }
 
     return generatePolicy(username, 'Allow', event.methodArn);
