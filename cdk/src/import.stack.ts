@@ -1,13 +1,14 @@
 import { Construct } from 'constructs';
 import { aws_s3, aws_s3_deployment, aws_apigateway, aws_lambda,
   Stack, RemovalPolicy, StackProps, Duration, aws_s3_notifications, CfnOutput, 
-  aws_iam} from 'aws-cdk-lib';
+  aws_iam,
+  Fn} from 'aws-cdk-lib';
 import { LayerStack } from './layer.stack';
 import * as path from 'path';
-import { defaultCorsPreflightOptions, getCorsMethodOptions } from './configs';
+import { authorizationHeaders, defaultCorsPreflightOptions, getCorsMethodOptions } from './configs';
 
 export class ImportStack extends Stack {
-  constructor(scope: Construct, id: string, layerStack: LayerStack, props?: StackProps) {
+  constructor(scope: Construct, id: string, layerStack: LayerStack, props: StackProps) {
     super(scope, id, props);
 
     const artRssShopFilesBucket = new aws_s3.Bucket(this, 'ArtRssShopFilesBucket', {
@@ -73,7 +74,44 @@ export class ImportStack extends Stack {
     const api = new aws_apigateway.RestApi(this, 'ArtRssShopImportServiceApi', {
       restApiName: 'Import Service API',
       description: 'API for importing product CSV files',
-      defaultCorsPreflightOptions,
+      defaultCorsPreflightOptions: {
+        ...defaultCorsPreflightOptions,
+        allowHeaders: ['Content-Type', 'Authorization'],
+      },
+    });
+
+    api.addGatewayResponse("UnauthorizedResponse", {
+      type: aws_apigateway.ResponseType.UNAUTHORIZED,
+      statusCode: "401",
+      responseHeaders: authorizationHeaders,
+      templates: {
+        "application/json": JSON.stringify({
+          message: "Unauthorized: Missing or invalid token",
+          errorType: "UNAUTHORIZED",
+          errorCode: 401,
+        }),
+      },
+    });
+    
+    api.addGatewayResponse("ForbiddenResponse", {
+      type: aws_apigateway.ResponseType.ACCESS_DENIED,
+      statusCode: "403",
+      responseHeaders: authorizationHeaders,
+      templates: {
+        "application/json": JSON.stringify({
+          message: "Forbidden: You do not have access to this resource",
+          errorType: "FORBIDDEN",
+          errorCode: 403,
+        }),
+      },
+    });
+
+    const authorizerLambdaArn = Fn.importValue('BasicAuthorizerLambdaArn');
+    const basicAuthorizerLambda = aws_lambda.Function.fromFunctionArn(this, 'ImportBasicAuthorizerLambda', authorizerLambdaArn);
+
+    const authorizer = new aws_apigateway.TokenAuthorizer(this, 'ArtRssShopBasicAuthorizerToken', {
+      handler: basicAuthorizerLambda,
+      resultsCacheTtl: Duration.seconds(0), // Disable caching (important for real-time validation)
     });
 
     const importResource = api.root.addResource('import');
@@ -81,6 +119,8 @@ export class ImportStack extends Stack {
       'GET',
       new aws_apigateway.LambdaIntegration(importProductsFileLambda),
       {
+        authorizationType: aws_apigateway.AuthorizationType.CUSTOM,
+        authorizer,
         ...getCorsMethodOptions(),
         requestParameters: {
           'method.request.querystring.name': true,
