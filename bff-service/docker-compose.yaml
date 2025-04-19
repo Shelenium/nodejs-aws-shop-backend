@@ -1,0 +1,7 @@
+services:
+  cart-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
