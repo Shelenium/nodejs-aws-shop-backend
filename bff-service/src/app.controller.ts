@@ -16,7 +16,10 @@ export class AppController {
   async getProduct() {
     this.httpService.get(basePath.product!).pipe(
       catchError((error) => throwError(() => (
-        new HttpException(error.response?.data || 'Failed to fetch products', error.response?.status || 500)
+        new HttpException(
+          error.response?.data || 'Failed to fetch products',
+          error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        )
       )))
     );
   }
@@ -25,7 +28,10 @@ export class AppController {
   async updateProduct() {
     this.httpService.put(basePath.product!).pipe(
       catchError((error) => throwError(() => (
-        new HttpException(error.response?.data || 'Failed to update products', error.response?.status || 500)
+        new HttpException(
+          error.response?.data || 'Failed to update products',
+          error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        )
       )))
     );
   }
@@ -34,7 +40,10 @@ export class AppController {
   async deleteProduct(@Param('id') id: string) {
     this.httpService.delete(`${basePath.product!}/${id}`).pipe(
       catchError((error) => throwError(() => (
-        new HttpException(error.response?.data || 'Failed to delete product', error.response?.status || 500)
+        new HttpException(
+          error.response?.data || 'Failed to delete product',
+          error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        )
       )))
     );
   }
@@ -43,7 +52,10 @@ export class AppController {
   async getProductById(@Param('id') id: string) {
     this.httpService.get(`${basePath.product!}/${id}`).pipe(
       catchError((error) => throwError(() => (
-        new HttpException(error.response?.data || 'Failed to get product by id', error.response?.status || 500)
+        new HttpException(
+          error.response?.data || 'Failed to get product by id',
+          error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        )
       )))
     );
   }
@@ -52,29 +64,46 @@ export class AppController {
   async getProfileCart() {
     this.httpService.get(`${basePath.cart!}`).pipe(
       catchError((error) => throwError(() => (
-        new HttpException(error.response?.data || 'Failed to get cart', error.response?.status || 500)
+        new HttpException(
+          error.response?.data || 'Failed to get cart',
+          error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        )
       )))
-    );  }
+    );
+  }
 
   @Put('cart')
   async updateProfileCart(@Body() body: CartItem) {
     this.httpService.put(basePath.cart!, body).pipe(
       catchError((error) => throwError(() => (
-        new HttpException(error.response?.data || 'Failed to update cart', error.response?.status || 500)
+        new HttpException(
+          error.response?.data || 'Failed to update cart', 
+          error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        )
       )))
     );
   }
 
   @Get('order')
   async getOrders() {
-    // Logic handled after validation by the interceptor
+    this.httpService.delete(`${basePath.order!}`).pipe(
+      catchError((error) => throwError(() => (
+        new HttpException(
+          error.response?.data || 'Failed to get order',
+          error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        )
+      )))
+    );
   }
 
   @Put('order')
   async updateOrders(@Body() body: CreateOrderDto) {
     this.httpService.put(basePath.order!, body).pipe(
       catchError((error) => throwError(() => (
-        new HttpException(error.response?.data || 'Failed to update cart', error.response?.status || 500)
+        new HttpException(
+          error.response?.data || 'Failed to update order',
+          error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        )
       )))
     );
   }

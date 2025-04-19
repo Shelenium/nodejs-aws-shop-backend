@@ -20,6 +20,6 @@ COPY --from=builder /app/package-lock.json ./package-lock.json
 # Install dependencies and remove unnecessary files
 RUN npm ci --production && npm prune --production && rm -rf /tmp/* ~/.npm
 
-EXPOSE 8080
+EXPOSE 4000
 
 CMD ["node", "dist/main.js"]
